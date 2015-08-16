@@ -1,0 +1,137 @@
+--[[
+EGMakeClass( "Items.JetpackWall", "EGWorldObject" )
+Items.Jetpack.DisplayName		= "Long Range Jetpack"
+Items.Jetpack.Path				= "Machines.JetpackWall.egm"
+Items.Jetpack.ShowInfo			= true
+Items.Jetpack.CollectedTimer	= 0
+System.Interior.RegisterEntityType( Items.JetpackWall )
+
+local JETPACK_RESPAWN_TIME = 60
+
+
+function Items.JetpackWall:Update( aDeltaTime )
+
+	self.CollectedTimer = self.CollectedTimer - aDeltaTime
+	
+	if( self.CollectedTimer <= 0 ) then
+		self.CollectedTimer = 0
+		self.ShowInfo = true
+		self.Engine:SetPartAlpha( "Data\\Models\\"..self.Path, 1 )
+	else
+		self.ShowInfo = false
+		self.Engine:SetPartAlpha( "Data\\Models\\"..self.Path, 0 )
+	end
+end
+
+
+function Items.JetpackWall:OnGrab( )
+	if( self.CollectedTimer <= 0 ) then
+		local existingAmmo = gGame:GetPlayerInfo():GetInventoryCount( "Items.Jetpack" )
+		gGame:GetPlayerInfo():AddInventoryItem( "Items.Jetpack", 100 - existingAmmo )	
+		gGame:GetPlayer():SetHeldItem( "Items.Jetpack" )
+		self.CollectedTimer = JETPACK_RESPAWN_TIME
+	end
+end
+
+
+function Items.JetpackWall:Save( aStream )
+	aStream:WriteNumber( self.CollectedTimer )
+end
+
+
+function Items.JetpackWall:Load( aStream )
+	if( aStream:GetVersion() >= 3 ) then
+		self.CollectedTimer	= aStream:ReadNumber()
+	end
+end
+
+
+EGMakeClass( "Items.Jetpack", "EGWorldObject" )
+Items.Jetpack.Path				= "Machines.Jetpack.egm"
+Items.Jetpack.Scale			= 1
+--Items.FireExtinguisher.Weapon			= EGWeaponExtinguisher
+Items.Jetpack.DisplayName		= "Jetpack"
+Items.Jetpack.ParticlePos		= EGVector(0,.075,0)
+
+
+function Items.Jetpack:Init( aCInfo )
+	self.Weapon	= EGWeaponJetpack --Jetpack
+end
+
+
+function Items.Jetpack:Update( aDeltaTime )
+
+	-- TEMP
+	self.GunCooldown = self.GunCooldown or 0	
+	self.GunCooldown = math.max( self.GunCooldown - aDeltaTime, 0 )
+	
+	local player = gGame:GetPlayer()
+	local playerAlive = player.GetHealthPercent and player:GetHealthPercent() > 0
+	
+	if( playerAlive and System.GetPlayerControlActor() == player and gGame:GetControls():GetAction( "USE_RIGHT" ) > 0 ) then
+	
+		System.Audio.PlaySound( "FireExtinguisher", 1.0, self.Engine )
+		System.Audio.PlaySound( "FireExtinguisher2", 1.0, self.Engine )
+		System.Audio.PlaySound( "FireExtinguisher3", 1.0, self.Engine )
+		System.Audio.SetSoundPitch( "FireExtinguisher2", .3 )
+		System.Audio.SetSoundPitch( "FireExtinguisher3", .1 )
+		self.Engine:AttachParticles( "FireExtinguish", "FireExtinguishProjectile", 1.0, self.ParticlePos, EGVector.FOREWARD )
+		
+		if( player.Engine:GetCharacterPhysicsContext() == "IN AIR" ) then
+			player.Engine:AddLocalAcceleration( EGVector( 0, 500, 0 ) )
+		end
+
+	---[=[
+		-- Hardcode this because defining it in the class doesn't work if the Extinguisher is defined before the weapon
+		local weapon 	= EGWeaponJetpack
+		local owner 	= self.Engine:GetCharacterOwner()
+		if( weapon and owner and self.GunCooldown <= 0 ) then
+		
+			gGame:GetPlayerInfo():AddInventoryItem( self.FullName, -1 )
+
+			local numProjectiles		= 1
+			local bulletRandomSpreadX	= 0.01
+			local bulletRandomSpreadY	= 0.01
+			local cooldownTime			= 0.25
+			local barrelTypeName		= weapon.BarrelTypeName
+			local flareParticlesName	= weapon.FlareParticlesName
+			local soundName				= weapon.SoundName
+				
+			local barrels = self[barrelTypeName]
+			--if( type( barrels ) ~= "table" ) then		error( self.ClassName..".GunBarrels should be an EGEnum table, not a "..type( barrels ) )	end
+			
+			--for i,barrel in ipairs( barrels ) do
+			
+				--local camera = self.Engine:GetChildEntity( "Player Camera" )
+				--local orientation = camera.Engine:GetLocalTransform()
+				--local barrelOrientation = self.Engine:GetLocalObjectOrientation( EGEnum( "Player Camera" ) )
+				--self.Engine:AttachParticles("BarrelFlare"..tostring(i), flareParticlesName, 1.0, barrelOrientation:GetTranslate(), EGVector(0,1,0) )
+				
+				for i = 1,numProjectiles do
+					
+					local bulletAngle = EGRandomFloat( 0, math.pi * 2 )
+					local bulletDistance = EGRandomFloat( 0, 1 )
+					local bulletExtraRotation = EGVector( math.cos( bulletAngle ) * bulletDistance * bulletRandomSpreadX, math.sin( bulletAngle ) * bulletDistance * bulletRandomSpreadY, 0 )
+					
+					local bullet = weapon:New{ Owner = owner }
+					--bullet.Orientation		= orientation
+					--bullet.ExtraRotation	= bulletExtraRotation
+					bullet.OwnerEntity		= owner.Engine
+					bullet.AnchorEntity		= self.Engine
+					bullet.ParentPlanet	= self:GetCurrentPlanet().Engine
+					System.GetCurrentScene():Add( bullet )
+				end	
+			--end
+			
+			self.GunCooldown = self.GunCooldown + cooldownTime
+			--[[
+			if( soundName and self.GunSoundCooldown <= 0 ) then
+				System.Audio.PlaySound( soundName, 1, self.Engine )
+				self.GunSoundCooldown = .1
+			end
+			--]]
+		end
+	--]=]
+	end
+end
+]]
