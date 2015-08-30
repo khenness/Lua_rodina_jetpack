@@ -845,7 +845,7 @@ function Items.Jetpack:Update( aDeltaTime )
 		self.Engine:AttachParticles( "FireExtinguish", "FireExtinguishProjectile", 1.0, self.ParticlePos, EGVector.FOREWARD )
 		
 		if( player.Engine:GetCharacterPhysicsContext() == "IN AIR" ) then
-			player.Engine:AddLocalAcceleration( EGVector( 0, 500, 0 ) )
+			player.Engine:AddLocalAcceleration( EGVector( 16, 16, 16 ) )
 		end
 
 	---[=[

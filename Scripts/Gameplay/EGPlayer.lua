@@ -16,12 +16,22 @@ EGActor.JETPACK_FUEL_RESTORE_RATE	= 0.01 --2
 EGActor.JETPACK_FUEL_USE_RATE		= 2
 EGActor.JETPACK_FUEL_MAX			= 200
 EGActor.EXO_SUIT_EQUIPPED           = false
+EGActor.JETPACK_SPEED               = 40
 
+function GetJetpackSpeed()
+	if (EGActor.EXO_SUIT_EQUIPPED == true) then
+		return (40*16)
+	else
+		return 40
+	end	
+end
 
 
 
 EGPlayer.EntityType			= "CharacterActor"
 EGPlayer.CameraOffset = EGVector(0,.1,1.65)
+
+
 
 EGPlayer.CharacterPhysics = 
 {
@@ -50,10 +60,13 @@ EGPlayer.CharacterPhysics =
 	AirAcceleration = 10,
 	TempAirGravity = -25,
 	AirGain = .01,
-	
-	JetpackSpeed = 40*16,
+
+	--JetpackSpeed = 40,
+	JetpackSpeed = EGActor.JETPACK_SPEED,
+	--JetpackSpeed = GetJetpackSpeed,
 	JetpackGainLow = 0.5,
 	JetpackGainHigh = 1.0,
+
 	--I'd like to have something like this, but later:
 	--JetpackGainForward
 	--JetpackGainBackward
@@ -84,6 +97,7 @@ EGPlayer.CharacterPhysics =
 		TempAirGravity = -25,
 	},
 }
+
 --[[
 EGPlayer.CharacterPhysics = 
 {
@@ -252,7 +266,11 @@ end
 -------------------------------------------------------------------------------
 function EGPlayer:Update( aDeltaTime )
  	DebugText("EXO-SUIT Enabled", tostring(EGActor.EXO_SUIT_EQUIPPED))
+	DebugText("JETPACK_SPEED", tostring(EGActor.JETPACK_SPEED))
+	DebugText("EGPlayer.CharacterPhysics.JetpackSpeed", tostring(EGPlayer.CharacterPhysics.JetpackSpeed))
 	self.Engine:SetPhysicsType( EGActor.PHYSICS_DRIVEN )
+	
+
 	
 	if( self.Health <= 0 ) then
 		self.Engine:SetMovementVelocity( EGVector() )
@@ -268,13 +286,22 @@ function EGPlayer:Update( aDeltaTime )
 	if( System.GetPlayerCameraActor() == self ) then
 		self:SetLookAtInfo()
 	end	
-		
+	
+
+	
 	self:UpdateControls( aDeltaTime )	
 	self:RestoreHealth( aDeltaTime )
 	self:RestoreJetpack( aDeltaTime )
 	self:UpdateFireDamage( aDeltaTime )
 	self:UpdateEffectModules( aDeltaTime )
 	self:UpdateDecompression( aDeltaTime )
+	--[[
+	if  (EGActor.EXO_SUIT_EQUIPPED == true) then
+		EGPlayer.CharacterPhysics.JetpackSpeed = 40*16
+	else
+		EGPlayer.CharacterPhysics.JetpackSpeed = 40
+	end	
+    ]]
 	
 	--[[
 	if( self ~= gGame:GetPlayer() ) then
@@ -474,6 +501,11 @@ function EGPlayer:UpdateControls( aDeltaTime )
 	else
 		self.Engine:SetMovementVelocity( EGVector() )	
 	end
+	
+	
+
+	
+	
 end
 
 -------------------------------------------------------------------------------
@@ -636,11 +668,23 @@ function EGPlayer:UpdateHeldItem( aSwitch )
 	end	
 	if(  self.HeldType) then
 	    DebugText( "Kevin - self.HeldType.FullName: ", tostring(self.HeldType.FullName) )
-	end	
-    if(  self.HeldType and tostring(self.HeldType.FullName) == "Items.Jetpack") then
+	end
+    EGPlayer.CharacterPhysics.JetpackSpeed = 40	
+    
+	EGActor.EXO_SUIT_EQUIPPED = false
+	if(  self.HeldType and tostring(self.HeldType.FullName) == "Items.Jetpack") then
 	    EGActor.EXO_SUIT_EQUIPPED = true
+		EGActor.JETPACK_SPEED = 40*16
+		--EGPlayer.CharacterPhysics.JetpackSpeed = 40*16
+		--self.Engine:GetCharacterPhysicsContext()
+		--self.UpdateEffectModules(aDeltaTime)
+		--self.Engine:SetPhysicsType( EGActor.PHYSICS_PASSIVE )
+		--self.Engine:SetPhysicsType( EGActor.PHYSICS_DRIVEN )
 	else
-		EGActor.EXO_SUIT_EQUIPPED = false
+		--EGActor.EXO_SUIT_EQUIPPED = false
+		EGActor.JETPACK_SPEED = 40
+		--EGPlayer.CharacterPhysics.JetpackSpeed = 40
+		--self.UpdateEffectModules(aDeltaTime)
 	end
 	
 	if( self.EquippedType and gGame:GetControls():GetAction( "CANCEL" ) > 0 ) then
