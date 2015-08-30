@@ -12,9 +12,13 @@ EGActor.HEALTH_REFRESH_RATE			= 1
 EGActor.HEALTH_REFRESH_RATE_DANGER	= .5
 EGActor.FIRE_DAMAGE					= 50
 EGActor.FIRE_DAMAGE_STRENGTH_MAX	= 1
-EGActor.JETPACK_FUEL_RESTORE_RATE	= 0 --2
+EGActor.JETPACK_FUEL_RESTORE_RATE	= 0.01 --2
 EGActor.JETPACK_FUEL_USE_RATE		= 2
 EGActor.JETPACK_FUEL_MAX			= 200
+EGActor.EXO_SUIT_EQUIPPED           = false
+
+
+
 
 EGPlayer.EntityType			= "CharacterActor"
 EGPlayer.CameraOffset = EGVector(0,.1,1.65)
@@ -243,7 +247,7 @@ end
 
 -------------------------------------------------------------------------------
 function EGPlayer:Update( aDeltaTime )
- 	
+ 	DebugText("EXO-SUIT Enabled", tostring(EGActor.EXO_SUIT_EQUIPPED))
 	self.Engine:SetPhysicsType( EGActor.PHYSICS_DRIVEN )
 	
 	if( self.Health <= 0 ) then
