@@ -624,6 +624,9 @@ function EGPlayer:UpdateHeldItem( aSwitch )
 	-- and we will need to try again as soon as we do have a camera!
 	self:CreateHeldItemEntity()
 	
+   
+	
+	
 	if( gGame:GetControls():GetAction( "SWITCH WEAPON" ) > 0 ) then
 		if( self.HeldType ) then
 			self:CancelHeldItem()
@@ -631,6 +634,14 @@ function EGPlayer:UpdateHeldItem( aSwitch )
 			self:SetHeldItem( self.EquippedType )
 		end
 	end	
+	if(  self.HeldType) then
+	    DebugText( "Kevin - self.HeldType.FullName: ", tostring(self.HeldType.FullName) )
+	end	
+    if(  self.HeldType and tostring(self.HeldType.FullName) == "Items.Jetpack") then
+	    EGActor.EXO_SUIT_EQUIPPED = true
+	else
+		EGActor.EXO_SUIT_EQUIPPED = false
+	end
 	
 	if( self.EquippedType and gGame:GetControls():GetAction( "CANCEL" ) > 0 ) then
 		self:Unequip( self.EquippedType )
@@ -642,10 +653,13 @@ function EGPlayer:UpdateHeldItem( aSwitch )
 	end
 	
 	if HUD then HUD:SetWeaponType( self.HeldType ) end
+	
+
 end
 
 -------------------------------------------------------------------------------
 function EGPlayer:SetHeldItem( aType )
+
 	if( type( aType ) == "string" ) then
 		aType = EGGetClass( aType )
 	end	
@@ -653,7 +667,7 @@ function EGPlayer:SetHeldItem( aType )
 	if( self.EquippedType ~= aType or self.HeldType ~= aType ) then
 		self:Unequip( self.EquippedType )
 	
-		--DebugText( "SetHeldItem", aType )	
+			
 		self.HeldType		= aType
 		self.EquippedType	= aType
 		
