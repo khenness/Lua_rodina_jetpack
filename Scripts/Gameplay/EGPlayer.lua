@@ -54,6 +54,10 @@ EGPlayer.CharacterPhysics =
 	JetpackSpeed = 40*16,
 	JetpackGainLow = 0.5,
 	JetpackGainHigh = 1.0,
+	--I'd like to have something like this, but later:
+	--JetpackGainForward
+	--JetpackGainBackward
+	
 	--[[
 	GroundSpeed = 200,
 	GoundAccelertation = 3000,

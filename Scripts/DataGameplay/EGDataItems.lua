@@ -791,6 +791,7 @@ end
 
 
 function Items.JetpackWall:OnGrab( )
+    --EGActor.EXO_SUIT_EQUIPPED = true
 	if( self.CollectedTimer <= 0 ) then
 		local existingAmmo = gGame:GetPlayerInfo():GetInventoryCount( "Items.Jetpack" )
 		gGame:GetPlayerInfo():AddInventoryItem( "Items.Jetpack", 100 - existingAmmo )	
